@@ -43,6 +43,24 @@ const updateEmployeeRole = async answers => {
         chalk.yellow(`${answers.employeeToUpdate}'s role updated successfully`)
     );
 }
+const updateEmployeeManager = async answers => {
+    const managerId = await getEmployeeId(answers.newManager);
+    const employeeId = await getEmployeeId(answers.employeeToUpdate);
+    await updateData("employee", employeeId, "MANAGER_ID", managerId);
+    console.log(
+        chalk.yellow(`${answers.employeeToUpdate}'s manager updated successfully`)
+    );
+}
+
+const viewEmployees = async () => {
+    let employees = await fetchEmployeeDetails();
+    return employees.map(employee => {
+        employee.MANAGER = `${employee.MANAGER_FIRST_NAME} ${employee.MANAGER_LAST_NAME}`;
+        delete employee.MANAGER_FIRST_NAME;
+        delete employee.MANAGER_LAST_NAME;
+        return employee;
+    });
+}
 
 const aksQuestions = async () => {
     const answers = await inquirer.prompt(questions);
@@ -68,24 +86,28 @@ const aksQuestions = async () => {
             console.table("Roles Summary", roles);
             break;
         case 'View Employees':
-            let employees = await fetchEmployeeDetails();
-            employees = employees.map(employee => {
-                employee.MANAGER = `${employee.MANAGER_FIRST_NAME} ${employee.MANAGER_LAST_NAME}`;
-                delete employee.MANAGER_FIRST_NAME;
-                delete employee.MANAGER_LAST_NAME;
-                return employee;
-            });
-            console.table("Employees Summary", employees);
+            console.table("Employees Summary", viewEmployees());
             break;
+        case 'View Employees By Manager':
+            const employees = await viewEmployees();
+            const filteredEmployees =
+            employees.filter(employee => employee.MANAGER == answers.viewByManager);
+            if(filteredEmployees.length)
+            console.table(`Employees Reporting To ${answers.viewByManager}`, filteredEmployees);
+            else
+            console.log(chalk.yellow(`Sorry. No one currently reports to ${answers.viewByManager}`));
+            break;
+
         case 'Update Employee Role':
             await updateEmployeeRole(answers);
             break;
+        case 'Update Employee Manager':
+            await updateEmployeeManager(answers);
+            break;
     }
     inquirer.prompt(continueQuestion).then(async answers => {
-        if (answers.continue) {
-            await aksQuestions();
-        }
-
+        answers.continue ? await aksQuestions() :
+            console.log(chalk.yellow("Thanks for your time. Have a great day!"));
     });
 }
 initializeDisplay();
