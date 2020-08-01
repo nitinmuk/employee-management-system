@@ -4,11 +4,13 @@ const figlet = require('figlet');
 const cTable = require('console.table');
 const inquirer = require('inquirer');
 const { questions, continueQuestion } = require('./lib/questions');
-const { addDepartment, addEmployee,
-    addRole, fetchData, fetchEmployeeByName,
-    fetchRoleDetails, fetchEmployeeDetails,
-    updateData
-} = require('./lib/queryEmployeeDB');
+const QueryDepartment = require('./lib/QueryDepartment');
+const QueryRole = require('./lib/QueryRole');
+const QueryEmployee = require('./lib/QueryEmployee');
+
+const queryDepartment = new QueryDepartment();
+const queryRole = new QueryRole();
+const queryEmployee = new QueryEmployee();
 
 
 const initializeDisplay = () => {
@@ -19,90 +21,58 @@ const initializeDisplay = () => {
         )
     );
 }
-
-const getRoleId = async roleTitle => {
-    const role = await fetchData("role", "TITLE", roleTitle);
-    return role[0].ID;
-}
-
-const getEmployeeId = async employeeName => {
-    let employeeId = null;
-    if ('None' != employeeName) {
-        employeeName = employeeName.split(" ");
-        const employee = await fetchEmployeeByName(employeeName[0], employeeName[1]);
-        employeeId = employee[0].ID;
-    }
-    return employeeId;
-}
-
-const updateEmployeeRole = async answers => {
-    const roleId = await getRoleId(answers.newRole);
-    const employeeId = await getEmployeeId(answers.employeeToUpdate);
-    await updateData("employee", employeeId, "ROLE_ID", roleId);
-    console.log(
-        chalk.yellow(`${answers.employeeToUpdate}'s role updated successfully`)
-    );
-}
-const updateEmployeeManager = async answers => {
-    const managerId = await getEmployeeId(answers.newManager);
-    const employeeId = await getEmployeeId(answers.employeeToUpdate);
-    await updateData("employee", employeeId, "MANAGER_ID", managerId);
-    console.log(
-        chalk.yellow(`${answers.employeeToUpdate}'s manager updated successfully`)
-    );
-}
-
-const viewEmployees = async () => {
-    let employees = await fetchEmployeeDetails();
-    return employees.map(employee => {
-        employee.MANAGER = `${employee.MANAGER_FIRST_NAME} ${employee.MANAGER_LAST_NAME}`;
-        delete employee.MANAGER_FIRST_NAME;
-        delete employee.MANAGER_LAST_NAME;
-        return employee;
-    });
-}
-
 const aksQuestions = async () => {
     const answers = await inquirer.prompt(questions);
     switch (answers.action) {
         case 'Add Department':
-            await addDepartment([[answers.newDepartment]]);
+            await queryDepartment.addDepartment({ newDepartment: answers.newDepartment });
             break;
         case 'Add Role':
-            const department = await fetchData("department", "NAME", answers.newRoleDepartment);
-            await addRole([[answers.newRoleTitle, answers.newRoleSalary, department[0].ID]]);
+            await queryRole.addRole({
+                newRoleTitle: answers.newRoleTitle,
+                newRoleSalary: answers.newRoleSalary,
+                selectedDepartment : answers.selectedDepartment
+            });
             break;
         case 'Add Employee':
-            const roleId = await getRoleId(answers.employeeRoleTitle);
-            const managerId = await getEmployeeId(answers.employeeManager);
-            await addEmployee([[answers.employeeFirstName, answers.employeeLastName, roleId, managerId]]);
+            await queryEmployee.addEmployee({
+                employeeRoleTitle: answers.employeeRoleTitle,
+                employeeManager: answers.employeeManager,
+                employeeFirstName: answers.employeeFirstName,
+                employeeLastName: answers.employeeLastName
+            });
             break;
         case 'View Departments':
-            const departments = await fetchData("department", "1", "1");
+            const departments = await queryDepartment.viewDepartment();
             console.table("Departments Summary", departments);
             break;
         case 'View Roles':
-            const roles = await fetchRoleDetails();
+            const roles = await queryRole.viewRoles();
             console.table("Roles Summary", roles);
             break;
         case 'View Employees':
-            console.table("Employees Summary", viewEmployees());
+            console.table("Employees Summary", await queryEmployee.viewEmployees());
             break;
         case 'View Employees By Manager':
-            const employees = await viewEmployees();
-            const filteredEmployees =
-            employees.filter(employee => employee.MANAGER == answers.viewByManager);
-            if(filteredEmployees.length)
-            console.table(`Employees Reporting To ${answers.viewByManager}`, filteredEmployees);
-            else
-            console.log(chalk.yellow(`Sorry. No one currently reports to ${answers.viewByManager}`));
+            await queryEmployee.viewEmployeesByManager({
+                managerName: answers.viewByManager
+            });
             break;
 
         case 'Update Employee Role':
-            await updateEmployeeRole(answers);
+            await queryEmployee.updateEmployeeRole({
+                newRole: answers.newRole,
+                employeeToUpdate: answers.employeeToUpdate
+            });
             break;
         case 'Update Employee Manager':
-            await updateEmployeeManager(answers);
+            await queryEmployee.updateEmployeeManager({
+                newManager: answers.newManager,
+                employeeToUpdate: answers.employeeToUpdate
+            });
+            break;
+        case 'Delete Department':
+            await queryDepartment.deleteDepartment({ departmentName: answers.selectedDepartment });
             break;
     }
     inquirer.prompt(continueQuestion).then(async answers => {
