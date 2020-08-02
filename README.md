@@ -1,7 +1,7 @@
 # Employee Management System
 [![](https://img.shields.io/badge/License-Unlicense-green)](#license)
 ## Description
-It is a command line application which is built using node.js, inquirer and mysql packages to allow users to maintain and view employee data.
+It is a command line application which is built primarily using node.js, inquirer and mysql packages to allow users to maintain and view employee data.
 ## Table of Contents
 * [Installation](#installation)
 * [Usage](#usage)
