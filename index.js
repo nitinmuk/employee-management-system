@@ -12,7 +12,9 @@ const queryDepartment = new QueryDepartment();
 const queryRole = new QueryRole();
 const queryEmployee = new QueryEmployee();
 
-
+/**
+ * clears screen and display employee management system banner on screen.
+ */
 const initializeDisplay = () => {
     clear();
     console.log(
@@ -21,6 +23,10 @@ const initializeDisplay = () => {
         )
     );
 }
+
+/**
+ * ask relevant questions from user and process them as needed.
+ */
 const aksQuestions = async () => {
     initializeDisplay();
     const answers = await inquirer.prompt(questions);
@@ -33,10 +39,10 @@ const aksQuestions = async () => {
             await queryRole.addRole({
                 newRoleTitle: answers.newRoleTitle,
                 newRoleSalary: answers.newRoleSalary,
-                selectedDepartment : answers.selectedDepartment
+                selectedDepartment: answers.selectedDepartment
             });
             break;
-            
+
         case 'Add Employee':
             await queryEmployee.addEmployee({
                 employeeRoleTitle: answers.selectedRole,
@@ -52,8 +58,7 @@ const aksQuestions = async () => {
             break;
 
         case 'View Roles':
-            const roles = await queryRole.viewRoles();
-            console.table("Roles Summary", roles);
+            await queryRole.viewRoles();
             break;
 
         case 'View Employees':
@@ -91,7 +96,7 @@ const aksQuestions = async () => {
             await queryRole.deleteRole({ roleTitle: answers.selectedRole });
             break;
         case 'Delete Employee':
-            await queryEmployee.deleteEmployee( {employeeName : answers.employeeToUpdate});
+            await queryEmployee.deleteEmployee({ employeeName: answers.employeeToUpdate });
             break;
     }
     inquirer.prompt(continueQuestion).then(async answers => {
