@@ -28,6 +28,7 @@ const aksQuestions = async () => {
         case 'Add Department':
             await queryDepartment.addDepartment({ newDepartment: answers.newDepartment });
             break;
+
         case 'Add Role':
             await queryRole.addRole({
                 newRoleTitle: answers.newRoleTitle,
@@ -35,6 +36,7 @@ const aksQuestions = async () => {
                 selectedDepartment : answers.selectedDepartment
             });
             break;
+            
         case 'Add Employee':
             await queryEmployee.addEmployee({
                 employeeRoleTitle: answers.selectedRole,
@@ -43,20 +45,30 @@ const aksQuestions = async () => {
                 employeeLastName: answers.employeeLastName
             });
             break;
+
         case 'View Departments':
             const departments = await queryDepartment.viewDepartment();
             console.table("Departments Summary", departments);
             break;
+
         case 'View Roles':
             const roles = await queryRole.viewRoles();
             console.table("Roles Summary", roles);
             break;
+
         case 'View Employees':
             console.table("Employees Summary", await queryEmployee.viewEmployees());
             break;
+
         case 'View Employees By Manager':
             await queryEmployee.viewEmployeesByManager({
                 managerName: answers.viewByManager
+            });
+            break;
+
+        case 'View total utilized budget of a department':
+            await queryEmployee.viewTotalUtilizedBudget({
+                departmentName: answers.selectedDepartment
             });
             break;
 
