@@ -22,6 +22,7 @@ const initializeDisplay = () => {
     );
 }
 const aksQuestions = async () => {
+    initializeDisplay();
     const answers = await inquirer.prompt(questions);
     switch (answers.action) {
         case 'Add Department':
@@ -36,7 +37,7 @@ const aksQuestions = async () => {
             break;
         case 'Add Employee':
             await queryEmployee.addEmployee({
-                employeeRoleTitle: answers.employeeRoleTitle,
+                employeeRoleTitle: answers.selectedRole,
                 employeeManager: answers.employeeManager,
                 employeeFirstName: answers.employeeFirstName,
                 employeeLastName: answers.employeeLastName
@@ -73,6 +74,12 @@ const aksQuestions = async () => {
             break;
         case 'Delete Department':
             await queryDepartment.deleteDepartment({ departmentName: answers.selectedDepartment });
+            break;
+        case 'Delete Role':
+            await queryRole.deleteRole({ roleTitle: answers.selectedRole });
+            break;
+        case 'Delete Employee':
+            await queryEmployee.deleteEmployee( {employeeName : answers.employeeToUpdate});
             break;
     }
     inquirer.prompt(continueQuestion).then(async answers => {
