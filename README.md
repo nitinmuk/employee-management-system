@@ -7,12 +7,12 @@ It is a command line application which is built primarily using node.js, inquire
 * [Usage](#usage)
 * [License](#license)
 * [Contributing](#contributing)
-* [Tests](#tests)
 * [Questions](#questions)
 ## Installation
 Please clone/download repository, update database connection details in QueryData.js and run npm install to install relevant dependencies. Once, installation is successful, please run node index.js to execute the application.
 ## Usage
 It can be run from command line interface to maintain employees data. For e.g. you can add new employee, department and roles. You can also do more operations like update employee role, list all employees etc. Application is very user friendly and it will prompt appropriate questions to make usage easy.
+You may review this [video](https://drive.google.com/file/d/1HaIATFpehAT0sGFhas7-FNyDzMnlPFH0/view) to view sample application run.
 ## Contributing
 You are most welcome to contribute. There are various ways to contribut:
 1. You may raise a new feature request.
